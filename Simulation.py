@@ -100,10 +100,6 @@ class RoadClass(object):
                     
                 if CarLater.IfWait:
                     MaxMoveDistance = CarEarly.Position - CarLater.Position - 1
-                    '''
-                    if MaxMoveDistance < 0:
-                        print(MaxMoveDistance)
-                    '''
                     MaxVelocity = min(self.MaxVelocity, CarLater.MaxVelocity)
                     if MaxMoveDistance >= MaxVelocity:
                         CarLater.Position += MaxVelocity
@@ -171,28 +167,6 @@ class CrossClass(object):
         self.ExitRoadsWaitSchedule = [Road for Road in self.ExitRoads if RoadsList[Road].WaitFirstPriority != -1]
         self.ExitRoadsWaitScheduleMask = [True for _ in range(len(self.ExitRoadsWaitSchedule))]
         
-    '''
-    def AddCarToGarage(self, NowTime, CarObjToStart):
-        if len(CarObjToStart):
-            Car = CarObjToStart[0]
-            while(NowTime == Car.StartTime):
-                StartRoad = Car.Route[0]
-                # print(Car.Route)
-                # print(self.EntranceRoads)
-                print(Car.Number)
-                print('b', self.CrossNum)
-                print('s', Car.Route)
-                print('sb', self.ExitRoads)
-                print('sb', self.EntranceRoads)
-                print('dsb', StartRoad)
-                StartRoadIdx = self.EntranceRoads.index(StartRoad)
-                self.UnlimitedGarage[StartRoadIdx].append(CarObjToStart.pop(0))
-                if len(CarObjToStart):
-                    Car = CarObjToStart[0]
-                else:
-                    break
-    '''
-
     def AddCarFromGarage(self, RoadsList):
         for RoadIdx, RoadGarage in enumerate(self.UnlimitedGarage):
             while(len(RoadGarage)):
@@ -231,20 +205,6 @@ class CrossClass(object):
         while(len(self.ExitRoadsWaitSchedule)):
             # 更新一个入口最大优先级表
             # print('sb', self.ExitRoadsWaitSchedule, self.ExitRoadsWaitScheduleMask)
-            '''
-            self.UpdateEntrancePriority()
-            for ExitRoad in self.ExitRoadsWaitSchedule:
-                ExitRoadIdx = self.ExitRoads.index(ExitRoad)
-                ExitRoadObj = RoadsList[ExitRoad]
-                ExitRoadObj.UpdateFirstPriority()
-                # print(ExitRoadObj.WaitChannels)
-                # print(ExitRoadObj.WaitFirstPriority)
-                EntranceRoad = ExitRoadObj.Cars[ExitRoadObj.WaitFirstPriority][-1].NextRoad
-                if EntranceRoad != -1:
-                    EntranceRoadIdx = self.EntranceRoads.index(EntranceRoad)
-                    self.EntrancePriority[EntranceRoadIdx] = min(self.RoadsToTurnIdx[ExitRoadIdx, EntranceRoadIdx],
-                                                                 self.EntrancePriority[EntranceRoadIdx])
-            '''
             # 针对每条出口道路调度一圈
             for IdxInWaitSchedule, ExitRoad in enumerate(self.ExitRoadsWaitSchedule):
                 self.UpdateEntrancePriority(RoadsList)
@@ -294,10 +254,6 @@ class CrossClass(object):
                                 LockCheckSymbol = False
                                 EntranceChannel[0].IfWait = False
                                 EntranceChannel[0].UpdateStateToNextRoad(MaxEntranceDistance - 1)
-                                '''
-                                if MaxEntranceDistance - 1 < 0:
-                                    print(MaxEntranceDistance - 1)
-                                '''
                                 ExitRoadObj.UpdateTerminalStateChannel(ExitRoadObj.WaitFirstPriority, ExitChannel)
                                 ExitRoadObj.UpdateFirstPriority()
                                 break
@@ -310,10 +266,6 @@ class CrossClass(object):
                                 EntranceChannel.insert(0, ExitChannel.pop(-1))
                                 LockCheckSymbol = False
                                 EntranceChannel[0].IfWait = False
-                                '''
-                                if(EntranceChannel[1].Position - 1 < 0):
-                                    print(EntranceChannel[1].Position - 1)
-                                '''
                                 EntranceChannel[0].UpdateStateToNextRoad(EntranceChannel[1].Position - 1)
                                 ExitRoadObj.UpdateTerminalStateChannel(ExitRoadObj.WaitFirstPriority, ExitChannel)
                                 ExitRoadObj.UpdateFirstPriority()
@@ -450,8 +402,6 @@ if __name__ == '__main__':
             RoadObj.UpdateTerminalStateRoad()
 
         NeedScheduleCrossNum = len(CrossObjList)
-        # NowTimeScheduleCrossNum = NeedScheduleCrossNum + 1
-        # t0 = time.time()
         while(NeedScheduleCrossNum):
             # print(NeedScheduleCrossNum)
             LockCheckSymbol = True
@@ -470,16 +420,6 @@ if __name__ == '__main__':
                         DeadLockCross.append(CrossObj.CrossNum)
                 # print(LockCheckSymbol)
                 raise Exception('ErrorDeadLock, The locked crosses are: ' + str(DeadLockCross))
-            '''
-            if NeedScheduleCrossNum == NowTimeScheduleCrossNum:
-                DeadLockCross = []
-                for CrossIdx, CrossObj in enumerate(CrossObjList):
-                    if CrossObj.WaitSchedule == True:
-                        DeadLockCross.append(CrossObj.CrossNum)
-                raise Exception('ErrorDeadLock, The locked crosses are: ' + str(DeadLockCross))
-            else:
-                NowTimeScheduleCrossNum = NeedScheduleCrossNum
-            '''
 
         AddCarToGarage(NowTime, CrossObjList, CarObjToStart)
         for CrossObj in CrossObjList:
